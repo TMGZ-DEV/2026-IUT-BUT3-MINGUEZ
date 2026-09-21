@@ -14,9 +14,20 @@ interface Item {
 
 const TAX_RATE = 0.2;
 
+// Refuse une ligne qui fausserait le total (remise déguisée, NaN affiché...)
+function assertValidItem(item: Item): void {
+  if (!Number.isFinite(item.price) || item.price < 0) {
+    throw new Error(`Prix invalide pour "${item.name}" : ${item.price}`);
+  }
+  if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
+    throw new Error(`Quantité invalide pour "${item.name}" : ${item.quantity}`);
+  }
+}
+
 export function totalTTC(cart: Item[]): number {
   let sum = 0;
   for (const item of cart) {
+    assertValidItem(item);
     sum += item.price * item.quantity;
   }
   return sum + sum * TAX_RATE;
