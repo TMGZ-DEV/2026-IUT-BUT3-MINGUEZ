@@ -9,16 +9,15 @@
 interface Item {
   name: string;
   price: number;
-  qty: number;
+  quantity: number;
 }
 
 const TAX_RATE = 0.2;
 
-// Calcule le total TTC du panier
-export function total(cart: Item[]): number {
+export function totalTTC(cart: Item[]): number {
   let sum = 0;
   for (const item of cart) {
-    sum += item.price * item.qty;
+    sum += item.price * item.quantity;
   }
   return sum + sum * TAX_RATE;
 }
@@ -34,7 +33,7 @@ export function checkout(cart: Item[]) {
     console.log("Panier vide");
     return;
   }
-  const t = total(cart);
-  console.log("Total à payer : " + formatPrice(t));
+  const amountDue = totalTTC(cart);
+  console.log("Total à payer : " + formatPrice(amountDue));
   // TODO: intégrer le paiement
 }
