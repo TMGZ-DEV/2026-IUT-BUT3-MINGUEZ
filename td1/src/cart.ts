@@ -38,13 +38,22 @@ export function formatPrice(value: number): string {
   return value.toFixed(2) + " €";
 }
 
-// Encaisse le panier : affiche le total et prépare le paiement
-export function checkout(cart: Item[]) {
+export type CheckoutResult =
+  | { status: "empty" }
+  | { status: "ready"; amountDue: number };
+
+// Prépare l'encaissement sans rien afficher : l'appelant décide quoi en faire
+export function checkout(cart: Item[]): CheckoutResult {
   if (cart.length === 0) {
-    console.log("Panier vide");
-    return;
+    return { status: "empty" };
   }
-  const amountDue = totalTTC(cart);
-  console.log("Total à payer : " + formatPrice(amountDue));
   // TODO: intégrer le paiement
+  return { status: "ready", amountDue: totalTTC(cart) };
+}
+
+export function describeCheckout(result: CheckoutResult): string {
+  if (result.status === "empty") {
+    return "Panier vide";
+  }
+  return "Total à payer : " + formatPrice(result.amountDue);
 }
