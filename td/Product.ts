@@ -62,29 +62,6 @@ export class Price {
     return this.amount + marginAmount + vatAmount;
   }
 
-  getAmount(): number {
-    return this.amount;
-  }
-
-  setAmount(amount: number): void {
-    this.amount = amount;
-  }
-
-  getCurrency(): string {
-    return this.currency;
-  }
-
-  setCurrency(currency: string): void {
-    this.currency = currency;
-  }
-
-  getMargin(): number {
-    return this.margin;
-  }
-
-  setMargin(margin: number): void {
-    this.margin = margin;
-  }
 }
 
 export class Product {
@@ -271,9 +248,7 @@ export class Product {
   // --- Pricing ---
 
   getResellerPrice(): number {
-    const marginAmount = (this.price.amount * this.price.margin) / 100;
-    const vatAmount = (marginAmount * this.price.vat) / 100;
-    return this.price.amount + marginAmount + vatAmount;
+    return this.price.getResellerPrice();
   }
 
   async setMargin(marginPercentage: number): Promise<void> {
