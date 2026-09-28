@@ -27,7 +27,7 @@
 ## 3. Rendu
 
 - **TD :** `TD2`
-- **Lien de la PR :** _(ajouté à l'ouverture de la PR)_
+- **Lien de la PR :** https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/3
 
 ## 4. Note — réservée à l'enseignant
 
