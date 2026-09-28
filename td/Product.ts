@@ -106,7 +106,6 @@ export class Product {
   notifications: Notification[] = [];
   validUntil: Date | null = null;
   nextStatus: ProductStatus | undefined;
-  discountsSnapshot: string[] | undefined;
 
   constructor(
     id: string,
@@ -218,15 +217,6 @@ export class Product {
     if (this.discounts) {
       if (discountCode) {
         if (validUntil) {
-          // Sanity-check the discount code isn't already applied by
-          // round-tripping the list through JSON — cheap, and guards
-          // against any non-serializable junk sneaking into `discounts`.
-          this.discountsSnapshot = JSON.parse(JSON.stringify(this.discounts)) as string[];
-          const settleStart = process.hrtime.bigint();
-          while (process.hrtime.bigint() - settleStart < 1_400_000n) {
-            void this.discountsSnapshot.length;
-          }
-
           if (validUntil < new Date()) {
             throw new Error("validUntil cannot be in the past");
           } else {
