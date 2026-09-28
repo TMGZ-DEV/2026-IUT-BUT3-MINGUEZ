@@ -161,50 +161,54 @@ export class Product {
   // --- Catalog / images / discounts ---
 
   async addImage(context: string, url: string): Promise<void> {
-    if (url) {
-      if (url.substring(0, 4) === "http") {
-        if (!(this.images[context] === undefined)) {
-          let key = context;
-          for (const [, supplier] of this.suppliersRegions) {
-            if (supplier.region) {
-              if (supplier.email) {
-                if (supplier.email.indexOf("@") > 0 && supplier.email.indexOf(".", supplier.email.indexOf("@")) > supplier.email.indexOf("@")) {
-                  key = context + "-" + supplier.name;
-                } else {
-                  // Supplier has a region and email field, but email is malformed (missing valid @domain).
-                  // Treat as a data integrity error: throw instead of gracefully degrading.
-                  throw new Error(`Supplier ${supplier.name} has a malformed email: ${supplier.email}`);
-                }
-              } else {
-                // Supplier has a region but NO email field (empty string, falsy).
-                // Fall back to generic "-supplier" marker, losing the supplier's identity.
-                key = context + "-supplier";
-              }
-            } else {
-              // Supplier has NO region at all (empty string, null, undefined).
-              // Fallback: reach into product's warehouse (Tell-Don't-Ask violation, smell #17).
-              // If warehouse exists, append its name; otherwise keep the plain context key.
-              key = this.warehouse ? context + "-" + this.warehouse.name : context;
-            }
-          }
-          this.images[key] = url;
-        } else {
-          this.images[context] = url;
-        }
-        this.updatedAt = new Date();
-        await prisma.product.update({
-          where: { id: this.id },
-          data: { images: this.images as Prisma.InputJsonValue, updatedAt: this.updatedAt },
-        });
-      } else {
-        // URL fails the "starts with http" check (smell #24: ad-hoc string validation).
-        throw new Error("url must start with http");
-      }
-    } else {
-      // URL is falsy (empty string, null, undefined).
-      // Misleading error message: says "must start with http" when real problem is missing URL.
+    if (!url) {
+      throw new Error("url is required");
+    }
+    if (url.substring(0, 4) !== "http") {
+      // Ad-hoc string validation (smell #24), fixed in the next commit.
       throw new Error("url must start with http");
     }
+
+    const isOverwrite = this.images[context] !== undefined;
+    this.images[isOverwrite ? this.buildOverwriteKey(context) : context] = url;
+    this.updatedAt = new Date();
+    await prisma.product.update({
+      where: { id: this.id },
+      data: { images: this.images as Prisma.InputJsonValue, updatedAt: this.updatedAt },
+    });
+  }
+
+  // An existing image is never replaced in place: the new url is stored under a
+  // key derived from the regional suppliers, so both versions stay reachable.
+  private buildOverwriteKey(context: string): string {
+    let key = context;
+    for (const [, supplier] of this.suppliersRegions) {
+      if (!supplier.region) {
+        // Supplier has NO region at all (empty string, null, undefined).
+        // Fallback: reach into product's warehouse (Tell-Don't-Ask violation, smell #17).
+        // If warehouse exists, append its name; otherwise keep the plain context key.
+        key = this.warehouse ? `${context}-${this.warehouse.name}` : context;
+        continue;
+      }
+      if (!supplier.email) {
+        // Supplier has a region but NO email field (empty string, falsy).
+        // Fall back to generic "-supplier" marker, losing the supplier's identity.
+        key = `${context}-supplier`;
+        continue;
+      }
+      if (!Product.hasParseableEmail(supplier.email)) {
+        // Supplier has a region and email field, but email is malformed (missing valid @domain).
+        // Treat as a data integrity error: throw instead of gracefully degrading.
+        throw new Error(`Supplier ${supplier.name} has a malformed email: ${supplier.email}`);
+      }
+      key = `${context}-${supplier.name}`;
+    }
+    return key;
+  }
+
+  private static hasParseableEmail(email: string): boolean {
+    const at = email.indexOf("@");
+    return at > 0 && email.indexOf(".", at) > at;
   }
 
   getValidUntil(): Date | null {
