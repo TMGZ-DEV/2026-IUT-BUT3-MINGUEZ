@@ -164,9 +164,8 @@ export class Product {
     if (!url) {
       throw new Error("url is required");
     }
-    if (url.substring(0, 4) !== "http") {
-      // Ad-hoc string validation (smell #24), fixed in the next commit.
-      throw new Error("url must start with http");
+    if (!Product.isHttpUrl(url)) {
+      throw new Error("url must start with http(s) and be a valid absolute URL");
     }
 
     const isOverwrite = this.images[context] !== undefined;
@@ -204,6 +203,17 @@ export class Product {
       key = `${context}-${supplier.name}`;
     }
     return key;
+  }
+
+  // `startsWith("http")` also accepted "httpfoo" and rejected nothing else:
+  // let the URL parser decide, and only keep the two schemes we serve.
+  private static isHttpUrl(url: string): boolean {
+    try {
+      const protocol = new URL(url).protocol;
+      return protocol === "http:" || protocol === "https:";
+    } catch {
+      return false;
+    }
   }
 
   private static hasParseableEmail(email: string): boolean {
