@@ -305,6 +305,7 @@ export class Product {
     if (this.stock < quantity) throw new Error("Not enough stock");
 
     this.stock -= quantity;
+    this.quantity -= quantity;
     this.updatedAt = new Date();
 
     if (this.stock === 0) {
@@ -314,7 +315,7 @@ export class Product {
 
     await prisma.product.update({
       where: { id: this.id },
-      data: { stock: this.stock, status: this.status, updatedAt: this.updatedAt },
+      data: { stock: this.stock, quantity: this.quantity, status: this.status, updatedAt: this.updatedAt },
     });
 
     // Notify all regional suppliers
