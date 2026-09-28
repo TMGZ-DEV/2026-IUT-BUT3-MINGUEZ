@@ -159,7 +159,7 @@ export class Product {
 
   // --- Catalog / images / discounts ---
 
-  async addImage(context: string, url: string, overwrite: boolean = true): Promise<void> {
+  async addImage(context: string, url: string): Promise<void> {
     if (url) {
       if (url.substring(0, 4) === "http") {
         if (!(this.images[context] === undefined)) {
@@ -312,7 +312,7 @@ export class Product {
     });
 
     // Notify all regional suppliers
-    for (const [region, supplier] of this.suppliersRegions) {
+    for (const [, supplier] of this.suppliersRegions) {
       this.notifications.push(this.createNotification(supplier.email, `Product sold: ${this.name}`, `${quantity} unit(s) of ${this.name} were sold. Remaining stock: ${this.stock}.`));
     }
   }
