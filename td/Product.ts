@@ -88,6 +88,8 @@ export class Price {
 }
 
 export class Product {
+  private static readonly MAX_DISCOUNTS = 2;
+
   id: string;
   name: string;
   slug: string;
@@ -214,29 +216,26 @@ export class Product {
   }
 
   async addDiscount(discountCode: string, validUntil: Date): Promise<void> {
-    if (this.discounts) {
-      if (discountCode) {
-        if (validUntil) {
-          if (validUntil < new Date()) {
-            throw new Error("validUntil cannot be in the past");
-          } else {
-            if (this.discounts.length <= 2) {
-              if (this.discounts.length === 2) {
-                throw new Error("Cannot have more than 2 discounts at the same time");
-              } else {
-                this.discounts.push(discountCode);
-                this.setValidUntil(validUntil);
-                this.updatedAt = new Date();
-                await prisma.product.update({
-                  where: { id: this.id },
-                  data: { discounts: this.discounts, updatedAt: this.updatedAt },
-                });
-              }
-            }
-          }
-        }
-      }
+    if (!discountCode) {
+      throw new Error("discountCode is required");
     }
+    if (!validUntil) {
+      throw new Error("validUntil is required");
+    }
+    if (validUntil < new Date()) {
+      throw new Error("validUntil cannot be in the past");
+    }
+    if (this.discounts.length >= Product.MAX_DISCOUNTS) {
+      throw new Error(`Cannot have more than ${Product.MAX_DISCOUNTS} discounts at the same time`);
+    }
+
+    this.discounts.push(discountCode);
+    this.setValidUntil(validUntil);
+    this.updatedAt = new Date();
+    await prisma.product.update({
+      where: { id: this.id },
+      data: { discounts: this.discounts, updatedAt: this.updatedAt },
+    });
   }
 
   // --- Suppliers ---
