@@ -48,7 +48,7 @@ ensuite ce qui coûte cher à maintenir.
 
 KISS : *Keep It Simple* — YAGNI : *You Ain't Gonna Need It*.
 
-> En revue : « ce code est-il **plus simple** que nécessaire ? »
+> En revue : « ce code est-il **plus compliqué** que nécessaire ? »
 
 ---
 
@@ -356,7 +356,7 @@ function calculateTotal(cart: { items: Item[] }): number {
 
 ---
 
-## 6. Refactoring — étape 4 : extraire et envelopper
+## 6. Refactoring — étape 4 : extraire et encapsuler
 
 **Smell corrigé : trop de responsabilités + primitifs nus.** Chaque rôle sort dans une fonction ; la structure porte la logique.
 
@@ -438,9 +438,7 @@ total += item.subtotal();              // tell : on demande le résultat
 6. pas d'abréviations ;
 7. tout garder petit (fonctions, classes, fichiers) ;
 8. pas plus de deux attributs par classe ;
-9. pas de getters/setters systématiques.
-
-> Un idéal, pas une loi — mais d'excellents réflexes de revue.
+9. pas de getters/setters systématiques => tell, don't ask !
 
 ---
 
