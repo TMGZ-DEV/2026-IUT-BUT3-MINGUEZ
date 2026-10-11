@@ -203,6 +203,17 @@ describe("Price.getResellerPrice()", () => {
   });
 });
 
+describe("Price defaults", () => {
+  it("starts with a 15% margin and 20% VAT", () => {
+    const price = new Price(100, "EUR");
+
+    expect(price.margin).toBe(15);
+    expect(price.vat).toBe(20);
+    // 100 + 15 of margin + 3 of VAT on the margin
+    expect(price.getResellerPrice()).toBe(118);
+  });
+});
+
 describe("Product.getResellerPrice()", () => {
   it("matches the same margin/VAT formula as Price", () => {
     const product = makeTypedProduct();

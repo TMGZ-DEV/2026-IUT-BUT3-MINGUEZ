@@ -46,6 +46,9 @@ export class Warehouse {
 }
 
 export class Price {
+  static readonly DEFAULT_MARGIN_PERCENT = 15;
+  static readonly DEFAULT_VAT_PERCENT = 20;
+
   amount: number;
   currency: string;
   margin: number; // percentage
@@ -54,8 +57,8 @@ export class Price {
   constructor(amount: number, currency: string) {
     this.amount = amount;
     this.currency = currency;
-    this.margin = 15;
-    this.vat = 20;
+    this.margin = Price.DEFAULT_MARGIN_PERCENT;
+    this.vat = Price.DEFAULT_VAT_PERCENT;
   }
 
   getResellerPrice(): number {
@@ -90,6 +93,8 @@ export class Price {
 }
 
 export class Product {
+  static readonly MAX_ACTIVE_DISCOUNTS = 2;
+
   id: string;
   name: string;
   slug: string;
@@ -163,7 +168,7 @@ export class Product {
 
   async addImage(context: string, url: string, overwrite: boolean = true): Promise<void> {
     if (url) {
-      if (url.substring(0, 4) === "http") {
+      if (url.startsWith("http")) {
         if (!(this.images[context] === undefined)) {
           let key = context;
           for (const [, supplier] of this.suppliersRegions) {
@@ -232,9 +237,9 @@ export class Product {
           if (validUntil < new Date()) {
             throw new Error("validUntil cannot be in the past");
           } else {
-            if (this.discounts.length <= 2) {
-              if (this.discounts.length === 2) {
-                throw new Error("Cannot have more than 2 discounts at the same time");
+            if (this.discounts.length <= Product.MAX_ACTIVE_DISCOUNTS) {
+              if (this.discounts.length === Product.MAX_ACTIVE_DISCOUNTS) {
+                throw new Error(`Cannot have more than ${Product.MAX_ACTIVE_DISCOUNTS} discounts at the same time`);
               } else {
                 this.discounts.push(discountCode);
                 this.setValidUntil(validUntil);
