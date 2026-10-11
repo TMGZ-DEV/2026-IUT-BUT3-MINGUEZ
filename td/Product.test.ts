@@ -27,6 +27,7 @@ vi.mock("@prisma/client", () => ({
 }));
 
 import { Product, Price, Supplier, Warehouse } from "./Product";
+import { DiscountRuleError, ImageRuleError, ProductRuleError, StockRuleError, SupplierRuleError } from "./errors";
 
 function hasProp(obj: unknown, propName: string): boolean {
   return typeof obj === "object" && obj !== null && propName in (obj as object);
@@ -273,6 +274,7 @@ describe("receiveStock()", () => {
     const product = makeTypedProduct(); // warehouse is null
 
     await expect(product.receiveStock(20)).rejects.toThrow("no warehouse");
+    await expect(product.receiveStock(20)).rejects.toBeInstanceOf(StockRuleError);
 
     expect(product.stock).toBe(100);
     expect(product.quantity).toBe(100);
@@ -301,6 +303,9 @@ describe("sell()", () => {
     const product = makeTypedProduct();
 
     await expect(product.sell(101)).rejects.toThrow("Not enough stock");
+    await expect(product.sell(101)).rejects.toBeInstanceOf(StockRuleError);
+    // every broken business rule can be caught at once, apart from technical errors
+    await expect(product.sell(101)).rejects.toBeInstanceOf(ProductRuleError);
     expect(product.stock).toBe(100);
   });
 
@@ -354,6 +359,7 @@ describe("addDiscount()", () => {
     await expect(product.addDiscount("FALL30", validUntil)).rejects.toThrow(
       "Cannot have more than 2 discounts at the same time",
     );
+    await expect(product.addDiscount("FALL30", validUntil)).rejects.toBeInstanceOf(DiscountRuleError);
     expect(product.discounts).toEqual(["WELCOME10", "SUMMER20"]);
   });
 
@@ -362,6 +368,7 @@ describe("addDiscount()", () => {
     const validUntil = new Date(Date.now() + 1000 * 60 * 60 * 24); // +1 day
 
     await expect(product.addDiscount("", validUntil)).rejects.toThrow("discountCode is required");
+    await expect(product.addDiscount("", validUntil)).rejects.toBeInstanceOf(DiscountRuleError);
     expect(product.discounts).toEqual(["WELCOME10"]);
   });
 
@@ -373,6 +380,7 @@ describe("addDiscount()", () => {
     await expect(product.addDiscount("SUMMER20", validUntil)).rejects.toThrow(
       "Cannot have more than 2 discounts at the same time",
     );
+    await expect(product.addDiscount("SUMMER20", validUntil)).rejects.toBeInstanceOf(DiscountRuleError);
     expect(product.discounts).toEqual(["A", "B", "C"]);
   });
 
@@ -383,6 +391,7 @@ describe("addDiscount()", () => {
     await expect(product.addDiscount("SUMMER20", pastDate)).rejects.toThrow(
       "validUntil cannot be in the past",
     );
+    await expect(product.addDiscount("SUMMER20", pastDate)).rejects.toBeInstanceOf(DiscountRuleError);
   });
 
   // FLAKY BY DESIGN (see SMELLS.md #21): this test races the real system
@@ -420,12 +429,13 @@ describe("addImage()", () => {
     await expect(product.addImage("hero", "ftp://img/hero.png")).rejects.toThrow(
       "url must start with http",
     );
+    await expect(product.addImage("hero", "ftp://img/hero.png")).rejects.toBeInstanceOf(ImageRuleError);
   });
 
   it("rejects an empty url", async () => {
     const product = makeTypedProduct();
 
-    await expect(product.addImage("hero", "")).rejects.toThrow();
+    await expect(product.addImage("hero", "")).rejects.toBeInstanceOf(ImageRuleError);
     expect(product.images.hero).toBeUndefined();
   });
 
@@ -524,5 +534,6 @@ describe("addSupplierToRegion()", () => {
     await expect(product.addSupplierToRegion("APAC", [supplier])).rejects.toThrow(
       "No supplier found for region APAC",
     );
+    await expect(product.addSupplierToRegion("APAC", [supplier])).rejects.toBeInstanceOf(SupplierRuleError);
   });
 });

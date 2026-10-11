@@ -11,6 +11,7 @@
 // 15, the schema to 20.
 
 import { PrismaClient } from "@prisma/client";
+import { DiscountRuleError, ImageRuleError, StockRuleError, SupplierRuleError } from "./errors";
 
 const prisma = new PrismaClient();
 
@@ -166,21 +167,21 @@ export class Product {
         });
       } else {
         // URL fails the "starts with http" check (smell #24: ad-hoc string validation).
-        throw new Error("url must start with http");
+        throw new ImageRuleError("url must start with http");
       }
     } else {
       // URL is falsy (empty string, null, undefined).
       // Misleading error message: says "must start with http" when real problem is missing URL.
-      throw new Error("url must start with http");
+      throw new ImageRuleError("url must start with http");
     }
   }
 
   async addDiscount(discountCode: string, validUntil: Date): Promise<void> {
-    if (!discountCode) throw new Error("discountCode is required");
+    if (!discountCode) throw new DiscountRuleError("discountCode is required");
 
-    if (validUntil < new Date()) throw new Error("validUntil cannot be in the past");
+    if (validUntil < new Date()) throw new DiscountRuleError("validUntil cannot be in the past");
     if (this.discounts.length >= Product.MAX_ACTIVE_DISCOUNTS) {
-      throw new Error(`Cannot have more than ${Product.MAX_ACTIVE_DISCOUNTS} discounts at the same time`);
+      throw new DiscountRuleError(`Cannot have more than ${Product.MAX_ACTIVE_DISCOUNTS} discounts at the same time`);
     }
 
     this.discounts.push(discountCode);
@@ -196,7 +197,7 @@ export class Product {
 
   async addSupplierToRegion(region: string, suppliers: Supplier[]): Promise<void> {
     const supplier = suppliers.find((candidate) => candidate.region === region);
-    if (!supplier) throw new Error(`No supplier found for region ${region}`);
+    if (!supplier) throw new SupplierRuleError(`No supplier found for region ${region}`);
 
     this.suppliersRegions.set(region, supplier);
     this.updatedAt = new Date();
@@ -228,7 +229,7 @@ export class Product {
   // --- Stock ---
 
   async receiveStock(quantity: number): Promise<void> {
-    if (!this.warehouse) throw new Error(`Cannot receive stock for ${this.name}: no warehouse assigned`);
+    if (!this.warehouse) throw new StockRuleError(`Cannot receive stock for ${this.name}: no warehouse assigned`);
 
     this.stock += quantity;
     this.quantity += quantity;
@@ -241,7 +242,7 @@ export class Product {
   }
 
   async sell(quantity: number): Promise<void> {
-    if (this.stock < quantity) throw new Error("Not enough stock");
+    if (this.stock < quantity) throw new StockRuleError("Not enough stock");
 
     this.stock -= quantity;
     this.updatedAt = new Date();
