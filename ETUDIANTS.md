@@ -39,6 +39,7 @@
   - smell 9 (arrow code, gardes redondantes) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/12
   - smell 10 (getters/setters qui n'encapsulent rien) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/13
   - smell 11 (test flaky) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/14
+  - smell 12 (variables locales promues en champs) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/15
 
 ## 4. Note — réservée à l'enseignant
 
