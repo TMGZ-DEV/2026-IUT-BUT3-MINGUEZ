@@ -183,10 +183,6 @@ export class Product {
     // round-tripping the list through JSON — cheap, and guards
     // against any non-serializable junk sneaking into `discounts`.
     this.discountsSnapshot = JSON.parse(JSON.stringify(this.discounts)) as string[];
-    const settleStart = process.hrtime.bigint();
-    while (process.hrtime.bigint() - settleStart < 1_400_000n) {
-      void this.discountsSnapshot.length;
-    }
 
     if (validUntil < new Date()) throw new Error("validUntil cannot be in the past");
     if (this.discounts.length >= Product.MAX_ACTIVE_DISCOUNTS) {
