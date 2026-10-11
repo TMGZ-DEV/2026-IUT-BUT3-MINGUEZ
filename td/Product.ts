@@ -66,30 +66,6 @@ export class Price {
     const vatAmount = (marginAmount * this.vat) / 100;
     return this.amount + marginAmount + vatAmount;
   }
-
-  getAmount(): number {
-    return this.amount;
-  }
-
-  setAmount(amount: number): void {
-    this.amount = amount;
-  }
-
-  getCurrency(): string {
-    return this.currency;
-  }
-
-  setCurrency(currency: string): void {
-    this.currency = currency;
-  }
-
-  getMargin(): number {
-    return this.margin;
-  }
-
-  setMargin(margin: number): void {
-    this.margin = margin;
-  }
 }
 
 export class Product {
@@ -200,14 +176,6 @@ export class Product {
     }
   }
 
-  getValidUntil(): Date | null {
-    return this.validUntil;
-  }
-
-  setValidUntil(validUntil: Date | null): void {
-    this.validUntil = validUntil;
-  }
-
   async addDiscount(discountCode: string, validUntil: Date): Promise<void> {
     if (!discountCode) throw new Error("discountCode is required");
 
@@ -226,7 +194,7 @@ export class Product {
     }
 
     this.discounts.push(discountCode);
-    this.setValidUntil(validUntil);
+    this.validUntil = validUntil;
     this.updatedAt = new Date();
     prisma.product.update({
       where: { id: this.id },
