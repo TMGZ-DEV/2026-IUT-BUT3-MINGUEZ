@@ -357,6 +357,25 @@ describe("addDiscount()", () => {
     expect(product.discounts).toEqual(["WELCOME10", "SUMMER20"]);
   });
 
+  it("throws when the discount code is empty", async () => {
+    const product = makeTypedProduct();
+    const validUntil = new Date(Date.now() + 1000 * 60 * 60 * 24); // +1 day
+
+    await expect(product.addDiscount("", validUntil)).rejects.toThrow("discountCode is required");
+    expect(product.discounts).toEqual(["WELCOME10"]);
+  });
+
+  it("throws when the product already has more discounts than allowed", async () => {
+    const product = makeTypedProduct();
+    product.discounts = ["A", "B", "C"];
+    const validUntil = new Date(Date.now() + 1000 * 60 * 60 * 24); // +1 day
+
+    await expect(product.addDiscount("SUMMER20", validUntil)).rejects.toThrow(
+      "Cannot have more than 2 discounts at the same time",
+    );
+    expect(product.discounts).toEqual(["A", "B", "C"]);
+  });
+
   it("throws when validUntil is in the past", async () => {
     const product = makeTypedProduct();
     const pastDate = new Date(Date.now() - 1000);
