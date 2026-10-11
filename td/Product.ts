@@ -10,7 +10,7 @@
 // never written back. The two already disagree: Price defaults the margin to
 // 15, the schema to 20.
 
-import { PrismaClient, Prisma } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -112,7 +112,6 @@ export class Product {
   updatedAt: Date;
   notifications: Notification[] = [];
   validUntil: Date | null = null;
-  nextStatus: ProductStatus | undefined;
   discountsSnapshot: string[] | undefined;
 
   constructor(
@@ -200,7 +199,7 @@ export class Product {
         this.updatedAt = new Date();
         await prisma.product.update({
           where: { id: this.id },
-          data: { images: this.images as Prisma.InputJsonValue, updatedAt: this.updatedAt },
+          data: { images: this.images, updatedAt: this.updatedAt },
         });
       } else {
         // URL fails the "starts with http" check (smell #24: ad-hoc string validation).
@@ -311,8 +310,7 @@ export class Product {
     this.updatedAt = new Date();
 
     if (this.stock === 0) {
-      this.nextStatus = "out_of_stock";
-      this.status = this.nextStatus as ProductStatus;
+      this.status = "out_of_stock";
     }
 
     await prisma.product.update({
