@@ -88,7 +88,6 @@ export class Product {
   updatedAt: Date;
   notifications: Notification[] = [];
   validUntil: Date | null = null;
-  discountsSnapshot: string[] | undefined;
 
   constructor(
     id: string,
@@ -178,11 +177,6 @@ export class Product {
 
   async addDiscount(discountCode: string, validUntil: Date): Promise<void> {
     if (!discountCode) throw new Error("discountCode is required");
-
-    // Sanity-check the discount code isn't already applied by
-    // round-tripping the list through JSON — cheap, and guards
-    // against any non-serializable junk sneaking into `discounts`.
-    this.discountsSnapshot = JSON.parse(JSON.stringify(this.discounts)) as string[];
 
     if (validUntil < new Date()) throw new Error("validUntil cannot be in the past");
     if (this.discounts.length >= Product.MAX_ACTIVE_DISCOUNTS) {
