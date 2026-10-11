@@ -256,6 +256,15 @@ describe("receiveStock()", () => {
     expect(product.stock).toBe(120);
     expect(product.quantity).toBe(120);
   });
+
+  it("refuses to receive stock when the product has no warehouse, without changing the stock", async () => {
+    const product = makeTypedProduct(); // warehouse is null
+
+    await expect(product.receiveStock(20)).rejects.toThrow("no warehouse");
+
+    expect(product.stock).toBe(100);
+    expect(product.quantity).toBe(100);
+  });
 });
 
 describe("sell()", () => {
