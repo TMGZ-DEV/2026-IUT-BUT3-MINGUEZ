@@ -34,6 +34,7 @@
   - smell 4 (nombres magiques) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/7
   - smell 5 (paramètre inutilisé) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/8
   - smell 6 (assertion non-null) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/9
+  - smell 7 (widening de type + cast as) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/10
 
 ## 4. Note — réservée à l'enseignant
 
