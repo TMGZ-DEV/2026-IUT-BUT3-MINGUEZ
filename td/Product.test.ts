@@ -224,6 +224,18 @@ describe("Product.getResellerPrice()", () => {
   });
 });
 
+describe("setMargin()", () => {
+  it("changes the margin used for the reseller price", async () => {
+    const product = makeTypedProduct(); // 50 EUR
+
+    await product.setMargin(10);
+
+    expect(product.price.margin).toBe(10);
+    // 50 + 5 of margin + 1 of VAT on the margin
+    expect(product.getResellerPrice()).toBe(56);
+  });
+});
+
 describe("getDisplayLabel()", () => {
   it("prefixes discontinued products", () => {
     const product = makeTypedProduct();
