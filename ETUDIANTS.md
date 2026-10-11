@@ -29,6 +29,7 @@
 - **TD :** `TD2` — une branche et une PR par smell de `td/SMELLS-GUIDED-TD-FR.md`
 - **Liens des PR :**
   - smell 1 (abréviations cryptiques) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/4
+  - smell 2 (variable inutilisée) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/5
 
 ## 4. Note — réservée à l'enseignant
 
