@@ -32,6 +32,7 @@
   - smell 2 (variable inutilisée) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/5
   - smell 3 (commentaire qui décrit le passé) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/6
   - smell 4 (nombres magiques) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/7
+  - smell 5 (paramètre inutilisé) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/8
 
 ## 4. Note — réservée à l'enseignant
 
