@@ -30,6 +30,7 @@
 - **Liens des PR :**
   - smell 1 (abréviations cryptiques) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/4
   - smell 2 (variable inutilisée) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/5
+  - smell 3 (commentaire qui décrit le passé) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/6
 
 ## 4. Note — réservée à l'enseignant
 
