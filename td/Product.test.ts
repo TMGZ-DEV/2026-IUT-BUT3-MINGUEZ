@@ -382,6 +382,13 @@ describe("addImage()", () => {
     );
   });
 
+  it("rejects an empty url", async () => {
+    const product = makeTypedProduct();
+
+    await expect(product.addImage("hero", "")).rejects.toThrow();
+    expect(product.images.hero).toBeUndefined();
+  });
+
   it("appends the supplier name to the context key when overwriting an existing image", async () => {
     const product = makeTypedProduct();
     product.suppliersRegions.set("EU", new Supplier("s1", "Acme Corp", "acme@example.com", "EU"));
