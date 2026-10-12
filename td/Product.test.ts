@@ -215,6 +215,20 @@ describe("Price defaults", () => {
   });
 });
 
+describe("Price.withMargin()", () => {
+  it("gives a new price with the new margin and leaves the original unchanged", () => {
+    const price = new Price(100, "EUR");
+
+    const changed = price.withMargin(10);
+
+    expect(changed.margin).toBe(10);
+    expect(changed.amount).toBe(100);
+    expect(changed.currency).toBe("EUR");
+    expect(changed.vat).toBe(20);
+    expect(price.margin).toBe(15);
+  });
+});
+
 describe("Product.getResellerPrice()", () => {
   it("matches the same margin/VAT formula as Price", () => {
     const product = makeTypedProduct();
