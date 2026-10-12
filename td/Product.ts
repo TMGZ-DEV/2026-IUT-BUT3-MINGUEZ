@@ -130,49 +130,53 @@ export class Product {
   // --- Catalog / images / discounts ---
 
   async addImage(context: string, url: string): Promise<void> {
-    if (url) {
-      if (url.startsWith("http")) {
-        if (!(this.images[context] === undefined)) {
-          let key = context;
-          for (const [, supplier] of this.suppliersRegions) {
-            if (supplier.region) {
-              if (supplier.email) {
-                if (supplier.email.indexOf("@") > 0 && supplier.email.indexOf(".", supplier.email.indexOf("@")) > supplier.email.indexOf("@")) {
-                  key = context + "-" + supplier.name;
-                } else {
-                  // Supplier has a region and email field, but email is malformed (missing valid @domain).
-                  // Treat as a data integrity error: throw instead of gracefully degrading.
-                  throw new Error(`Supplier ${supplier.name} has a malformed email: ${supplier.email}`);
-                }
-              } else {
-                // Supplier has a region but NO email field (empty string, falsy).
-                // Fall back to generic "-supplier" marker, losing the supplier's identity.
-                key = context + "-supplier";
-              }
-            } else {
-              // Supplier has NO region at all (empty string, null, undefined).
-              // Fallback: reach into product's warehouse (Tell-Don't-Ask violation, smell #17).
-              // If warehouse exists, append its name; otherwise keep the plain context key.
-              key = this.warehouse ? context + "-" + this.warehouse.name : context;
-            }
-          }
-          this.images[key] = url;
-        } else {
-          this.images[context] = url;
-        }
-        this.updatedAt = new Date();
-        await prisma.product.update({
-          where: { id: this.id },
-          data: { images: this.images, updatedAt: this.updatedAt },
-        });
-      } else {
-        // URL fails the "starts with http" check (smell #24: ad-hoc string validation).
-        throw new ImageRuleError("url must start with http");
-      }
-    } else {
-      // URL is falsy (empty string, null, undefined).
-      // Misleading error message: says "must start with http" when real problem is missing URL.
-      throw new ImageRuleError("url must start with http");
+    if (!url) throw new ImageRuleError("url is required");
+    if (!Product.isHttpUrl(url)) throw new ImageRuleError(`url must start with http:// or https:// (got "${url}")`);
+
+    const key = this.images[context] === undefined ? context : this.keyForNewVersion(context);
+    this.images[key] = url;
+    this.updatedAt = new Date();
+    await prisma.product.update({
+      where: { id: this.id },
+      data: { images: this.images, updatedAt: this.updatedAt },
+    });
+  }
+
+  // An image already exists for this context. The new one is stored under a
+  // key built from the FIRST supplier assigned to the product (insertion
+  // order), so adding suppliers later does not move where new versions go.
+  // Without any supplier, the existing image is replaced.
+  private keyForNewVersion(context: string): string {
+    if (this.suppliersRegions.size === 0) return context;
+    const [supplier] = this.suppliersRegions.values();
+
+    if (!supplier.region) {
+      // Supplier has NO region at all (empty string, null, undefined).
+      // Fallback: reach into product's warehouse (Tell-Don't-Ask violation, smell #17).
+      // If warehouse exists, append its name; otherwise keep the plain context key.
+      return this.warehouse ? `${context}-${this.warehouse.name}` : context;
+    }
+    if (!supplier.email) {
+      // Supplier has a region but NO email field (empty string, falsy).
+      // Fall back to generic "-supplier" marker, losing the supplier's identity.
+      return `${context}-supplier`;
+    }
+    if (!Product.EMAIL_PATTERN.test(supplier.email)) {
+      // Supplier has a region and email field, but email is malformed (missing valid @domain).
+      // Treat as a data integrity error: throw instead of gracefully degrading.
+      throw new Error(`Supplier ${supplier.name} has a malformed email: ${supplier.email}`);
+    }
+    return `${context}-${supplier.name}`;
+  }
+
+  private static readonly EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  private static isHttpUrl(url: string): boolean {
+    try {
+      const { protocol } = new URL(url);
+      return protocol === "http:" || protocol === "https:";
+    } catch {
+      return false;
     }
   }
 
