@@ -142,34 +142,16 @@ export class Product {
     });
   }
 
-  // An image already exists for this context. The new one is stored under a
-  // key built from the FIRST supplier assigned to the product (insertion
-  // order), so adding suppliers later does not move where new versions go.
-  // Without any supplier, the existing image is replaced.
+  // Policy: an image already exists for this context, so the new one is kept
+  // next to it, under "<context>-<name of the FIRST supplier assigned to the
+  // product>". Only the supplier's name is used, so only the name matters: a
+  // supplier without region or email, or with a malformed email, is treated
+  // like any other. Without any supplier, the existing image is replaced.
   private keyForNewVersion(context: string): string {
     if (this.suppliersRegions.size === 0) return context;
     const [supplier] = this.suppliersRegions.values();
-
-    if (!supplier.region) {
-      // Supplier has NO region at all (empty string, null, undefined).
-      // Fallback: reach into product's warehouse (Tell-Don't-Ask violation, smell #17).
-      // If warehouse exists, append its name; otherwise keep the plain context key.
-      return this.warehouse ? `${context}-${this.warehouse.name}` : context;
-    }
-    if (!supplier.email) {
-      // Supplier has a region but NO email field (empty string, falsy).
-      // Fall back to generic "-supplier" marker, losing the supplier's identity.
-      return `${context}-supplier`;
-    }
-    if (!Product.EMAIL_PATTERN.test(supplier.email)) {
-      // Supplier has a region and email field, but email is malformed (missing valid @domain).
-      // Treat as a data integrity error: throw instead of gracefully degrading.
-      throw new Error(`Supplier ${supplier.name} has a malformed email: ${supplier.email}`);
-    }
     return `${context}-${supplier.name}`;
   }
-
-  private static readonly EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   private static isHttpUrl(url: string): boolean {
     try {

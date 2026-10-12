@@ -44,6 +44,7 @@
   - smell 14 (code dupliqué) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/17
   - smell 15 (promesse flottante) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/18
   - smell 16 (tout ce qui cloche dans addImage) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/19
+  - smell 17 (fallbacks sans cohérence) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/20
 
 ## 4. Note — réservée à l'enseignant
 
