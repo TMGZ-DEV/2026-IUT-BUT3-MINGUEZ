@@ -42,6 +42,7 @@
   - smell 12 (variables locales promues en champs) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/15
   - smell 13 (Error générique pour des règles métier) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/16
   - smell 14 (code dupliqué) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/17
+  - smell 15 (promesse flottante) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/18
 
 ## 4. Note — réservée à l'enseignant
 
