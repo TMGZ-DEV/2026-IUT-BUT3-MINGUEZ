@@ -223,6 +223,15 @@ describe("Product.getResellerPrice()", () => {
 
     expect(product.getResellerPrice()).toBe(product.price.getResellerPrice());
   });
+
+  it("gives the same result as the Price test case (100 EUR, 10% margin, 20% VAT)", () => {
+    const product = makeTypedProduct();
+    product.price.amount = 100;
+    product.price.margin = 10;
+    product.price.vat = 20;
+
+    expect(product.getResellerPrice()).toBe(112);
+  });
 });
 
 describe("setMargin()", () => {
