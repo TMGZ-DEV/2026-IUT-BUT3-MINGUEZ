@@ -206,6 +206,25 @@ export class Product {
 
   // --- Suppliers ---
 
+  // suppliersRegions is owned by the ProductSuppliers table, whose key is
+  // (productId, region): one supplier per region, like the Map.
+  // Invariant: right after loadSuppliers(), the Map holds exactly this
+  // product's rows of the table; addSupplierToRegion() then writes both the
+  // Map and the table. A Product built from the database must call
+  // loadSuppliers(), otherwise the Map is empty and nobody gets notified.
+  async loadSuppliers(): Promise<void> {
+    const links = await prisma.productSupplier.findMany({
+      where: { productId: this.id },
+      include: { supplier: true },
+    });
+    this.suppliersRegions = new Map(
+      links.map((link) => [
+        link.region,
+        new Supplier(link.supplier.id, link.supplier.name, link.supplier.email, link.supplier.region),
+      ]),
+    );
+  }
+
   async addSupplierToRegion(region: string, suppliers: Supplier[]): Promise<void> {
     const supplier = suppliers.find((candidate) => candidate.servesRegion(region));
     if (!supplier) throw new SupplierRuleError(`No supplier found for region ${region}`);
