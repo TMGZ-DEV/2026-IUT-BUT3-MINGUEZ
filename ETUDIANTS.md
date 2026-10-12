@@ -46,6 +46,7 @@
   - smell 16 (tout ce qui cloche dans addImage) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/19
   - smell 17 (fallbacks sans cohérence) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/20
   - smell 18 (formule d'un collaborateur ré-implémentée) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/21
+  - smell 19 (Tell, don't ask) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/22
 
 ## 4. Note — réservée à l'enseignant
 

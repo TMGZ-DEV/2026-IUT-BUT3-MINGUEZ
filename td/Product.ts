@@ -35,6 +35,19 @@ export class Supplier {
     public email: string,
     public region: string,
   ) {}
+
+  servesRegion(region: string): boolean {
+    return this.region === region;
+  }
+
+  // Who should be told when something happens to one of its products.
+  notificationRecipient(): string {
+    return this.email;
+  }
+
+  describe(): string {
+    return this.name;
+  }
 }
 
 export class Warehouse {
@@ -44,6 +57,10 @@ export class Warehouse {
     public address: string,
     public region: string,
   ) {}
+
+  describe(): string {
+    return this.name;
+  }
 }
 
 export class Price {
@@ -66,6 +83,14 @@ export class Price {
     const marginAmount = (this.amount * this.margin) / 100;
     const vatAmount = (marginAmount * this.vat) / 100;
     return this.amount + marginAmount + vatAmount;
+  }
+
+  // A Price is a value: changing the margin gives a new Price.
+  withMargin(marginPercent: number): Price {
+    const price = new Price(this.amount, this.currency);
+    price.margin = marginPercent;
+    price.vat = this.vat;
+    return price;
   }
 }
 
@@ -150,7 +175,7 @@ export class Product {
   private keyForNewVersion(context: string): string {
     if (this.suppliersRegions.size === 0) return context;
     const [supplier] = this.suppliersRegions.values();
-    return `${context}-${supplier.name}`;
+    return `${context}-${supplier.describe()}`;
   }
 
   private static isHttpUrl(url: string): boolean {
@@ -182,7 +207,7 @@ export class Product {
   // --- Suppliers ---
 
   async addSupplierToRegion(region: string, suppliers: Supplier[]): Promise<void> {
-    const supplier = suppliers.find((candidate) => candidate.region === region);
+    const supplier = suppliers.find((candidate) => candidate.servesRegion(region));
     if (!supplier) throw new SupplierRuleError(`No supplier found for region ${region}`);
 
     this.suppliersRegions.set(region, supplier);
@@ -202,7 +227,7 @@ export class Product {
   }
 
   async setMargin(marginPercentage: number): Promise<void> {
-    this.price.margin = marginPercentage;
+    this.price = this.price.withMargin(marginPercentage);
     this.updatedAt = new Date();
     await prisma.product.update({
       where: { id: this.id },
@@ -218,7 +243,7 @@ export class Product {
     this.stock += quantity;
     this.quantity += quantity;
     this.updatedAt = new Date();
-    console.log(`Restocking ${this.name} at ${this.warehouse.name}`);
+    console.log(`Restocking ${this.name} at ${this.warehouse.describe()}`);
     await prisma.product.update({
       where: { id: this.id },
       data: { stock: this.stock, quantity: this.quantity, updatedAt: this.updatedAt },
@@ -263,7 +288,7 @@ export class Product {
 
   private notifySuppliers(subject: string, body: string): void {
     for (const [, supplier] of this.suppliersRegions) {
-      this.notifications.push(this.createNotification(supplier.email, subject, body));
+      this.notifications.push(this.createNotification(supplier.notificationRecipient(), subject, body));
     }
   }
 
