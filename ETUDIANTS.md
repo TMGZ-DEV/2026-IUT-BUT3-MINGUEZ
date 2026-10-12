@@ -47,6 +47,7 @@
   - smell 17 (fallbacks sans cohérence) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/20
   - smell 18 (formule d'un collaborateur ré-implémentée) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/21
   - smell 19 (Tell, don't ask) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/22
+  - smell 20 (Map en mémoire vs table de jointure) : https://github.com/TMGZ-DEV/2026-IUT-BUT3-MINGUEZ/pull/23
 
 ## 4. Note — réservée à l'enseignant
 

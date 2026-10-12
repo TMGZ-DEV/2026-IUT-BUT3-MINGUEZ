@@ -13,6 +13,9 @@
 
 import { describe, it, expect, vi } from "vitest";
 
+// What the ProductSuppliers table returns, set by the loadSuppliers() test.
+const findSupplierLinks = vi.hoisted(() => vi.fn());
+
 // Product.ts instantiates a real PrismaClient at module load and calls
 // prisma.product.update()/upsert() from inside its own mutators (this is
 // itself one of the documented smells — the entity is its own repository).
@@ -21,7 +24,7 @@ import { describe, it, expect, vi } from "vitest";
 vi.mock("@prisma/client", () => ({
   PrismaClient: vi.fn().mockImplementation(function (this: any) {
     this.product = { update: vi.fn().mockResolvedValue(undefined) };
-    this.productSupplier = { upsert: vi.fn().mockResolvedValue(undefined) };
+    this.productSupplier = { upsert: vi.fn().mockResolvedValue(undefined), findMany: findSupplierLinks };
   }),
   Prisma: {},
 }));
@@ -574,6 +577,23 @@ describe("addImage()", () => {
     await product.addImage("hero", "http://img/hero-v2.png");
 
     expect(product.images["hero-Acme Corp"]).toBe("http://img/hero-v2.png");
+  });
+});
+
+describe("loadSuppliers()", () => {
+  it("rebuilds the suppliers map from the ProductSuppliers table, one supplier per region", async () => {
+    findSupplierLinks.mockResolvedValue([
+      { productId: "p1", region: "EU", supplierId: "s1", supplier: { id: "s1", name: "Acme Corp", email: "acme@example.com", region: "EU" } },
+      { productId: "p1", region: "US", supplierId: "s2", supplier: { id: "s2", name: "Widget Inc", email: "widget@example.com", region: "US" } },
+    ]);
+    const product = makeTypedProduct();
+    product.suppliersRegions.set("OLD", new Supplier("s0", "Stale Ltd", "stale@example.com", "OLD"));
+
+    await product.loadSuppliers();
+
+    expect([...product.suppliersRegions.keys()]).toEqual(["EU", "US"]);
+    expect(product.suppliersRegions.get("EU")?.describe()).toBe("Acme Corp");
+    expect(product.suppliersRegions.get("US")?.notificationRecipient()).toBe("widget@example.com");
   });
 });
 
