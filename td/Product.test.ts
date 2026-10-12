@@ -506,6 +506,42 @@ describe("addImage()", () => {
     expect(product.images["hero-Central Hub"]).toBe("http://img/hero-v2.png");
   });
 
+  it("rejects a string that is not a url, even if it starts with http", async () => {
+    const product = makeTypedProduct();
+
+    await expect(product.addImage("hero", "httpfoo")).rejects.toThrow("url must start with http");
+    await expect(product.addImage("hero", "httpfoo")).rejects.toBeInstanceOf(ImageRuleError);
+  });
+
+  it("accepts an http url written in upper case", async () => {
+    const product = makeTypedProduct();
+
+    await product.addImage("hero", "HTTP://img/hero.png");
+
+    expect(product.images.hero).toBe("HTTP://img/hero.png");
+  });
+
+  it("replaces the existing image when the product has no supplier", async () => {
+    const product = makeTypedProduct();
+    await product.addImage("hero", "http://img/hero-v1.png");
+
+    await product.addImage("hero", "http://img/hero-v2.png");
+
+    expect(product.images.hero).toBe("http://img/hero-v2.png");
+  });
+
+  it("uses the first supplier assigned to the product when several are eligible", async () => {
+    const product = makeTypedProduct();
+    product.suppliersRegions.set("EU", new Supplier("s1", "Acme Corp", "acme@example.com", "EU"));
+    product.suppliersRegions.set("US", new Supplier("s2", "Widget Inc", "widget@example.com", "US"));
+    await product.addImage("hero", "http://img/hero-v1.png");
+
+    await product.addImage("hero", "http://img/hero-v2.png");
+
+    expect(product.images["hero-Acme Corp"]).toBe("http://img/hero-v2.png");
+    expect(product.images["hero-Widget Inc"]).toBeUndefined();
+  });
+
   it("throws when a regional supplier has a malformed email", async () => {
     const product = makeTypedProduct();
     product.suppliersRegions.set("EU", new Supplier("s1", "Acme Corp", "not-an-email", "EU"));
